@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechSphere Journal - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0a192f; --secondary: #112240; --accent: #00b4a6;
+            --light: #e6f1ff; --success: #28a745; --danger: #dc3545;
+            --text-dark: #1a2b4c; --text-gray: #586c8d; --white: #ffffff;
+            --border: #d1d9e6; --shadow: 0 10px 30px -15px rgba(10, 25, 47, 0.15);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f5f7fa; color: var(--text-dark); line-height: 1.6; }
+        .navbar { background: var(--primary); color: var(--white); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .nav-logo { font-size: 1.5rem; font-weight: bold; color: var(--accent); }
+        .nav-links { display: flex; align-items: center; gap: 1.5rem; }
+        .nav-links a { color: var(--light); text-decoration: none; font-weight: 500; }
+        .nav-links a:hover { color: var(--accent); }
+        .nav-user { color: var(--white); font-size: 0.9rem; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .card { background: var(--white); border-radius: 8px; padding: 2rem; box-shadow: var(--shadow); margin-bottom: 2rem; }
+        .section-spacing { margin-top: 3rem; }
+        .dashboard-header { margin-bottom: 2rem; }
+        .dashboard-header h2 { font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--white); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--accent); box-shadow: var(--shadow); display: flex; align-items: center; gap: 1rem; }
+        .stat-card i { font-size: 2rem; color: var(--accent); background: rgba(0, 180, 166, 0.1); padding: 1rem; border-radius: 50%; }
+        .stat-card h3 { font-size: 2rem; color: var(--primary); }
+        .stat-card p { color: var(--text-gray); font-size: 0.9rem; font-weight: 500; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-dark); }
+        .req { color: var(--danger); }
+        input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 4px; font-size: 1rem; transition: border 0.2s; font-family: inherit; background-color: #fff; }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(0, 180, 166, 0.1); }
+        textarea { resize: vertical; }
+        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; text-decoration: none; }
+        .btn-primary { background: var(--accent); color: var(--white); }
+        .btn-primary:hover { background: #009d92; }
+        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+        .btn-block { width: 100%; justify-content: center; }
+        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+        .file-upload-area { border: 2px dashed var(--border); border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s; background: #f8f9fa; }
+        .file-upload-area:hover { border-color: var(--accent); background: rgba(0, 180, 166, 0.05); }
+        .file-upload-area i { font-size: 2.5rem; color: var(--accent); margin-bottom: 1rem; }
+        .file-info { margin-top: 1rem; padding: 1rem; background: #f0f8ff; border-radius: 4px; border-left: 3px solid var(--accent); font-size: 0.9rem; }
+        .text-success { color: var(--success); font-weight: 600; }
+        .progress-container { margin-top: 1.5rem; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
+        .table-container { overflow-x: auto; margin-top: 1.5rem; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th { background: var(--secondary); color: var(--white); padding: 1rem; text-align: left; font-size: 0.85rem; text-transform: uppercase; }
+        .data-table td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        .data-table tr:hover { background: #f8f9fa; }
+        .badge { padding: 0.3rem 0.8rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; text-transform: capitalize; }
+        .badge-pending { background: #fff3cd; color: #856404; }
+        .badge-approved { background: #d4edda; color: #155724; }
+        .badge-rejected { background: #f8d7da; color: #721c24; }
+        .empty-state { text-align: center; padding: 2rem; color: var(--text-gray); font-style: italic; }
+        .hidden { display: none !important; }
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { padding: 1rem 1.5rem; background: var(--secondary); color: white; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transform: translateX(100px); transition: all 0.3s ease; min-width: 250px; }
+        .toast.show { opacity: 1; transform: translateX(0); }
+        .toast-success { border-left: 4px solid var(--success); }
+        .toast-error { border-left: 4px solid var(--danger); }
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; gap: 1rem; }
+            .nav-links { flex-wrap: wrap; justify-content: center; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div id="toast-container"></div>
+    <nav id="main-nav" class="navbar"></nav>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <h2>Welcome to your Dashboard</h2>
+            <p>Manage your journal submissions and profile.</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card"><i class="fas fa-file-alt"></i><div class="stat-info"><h3 id="stat-total">0</h3><p>Total Submissions</p></div></div>
+            <div class="stat-card"><i class="fas fa-hourglass-half"></i><div class="stat-info"><h3 id="stat-pending">0</h3><p>Pending</p></div></div>
+            <div class="stat-card"><i class="fas fa-check-circle"></i><div class="stat-info"><h3 id="stat-approved">0</h3><p>Approved</p></div></div>
+            <div class="stat-card"><i class="fas fa-times-circle"></i><div class="stat-info"><h3 id="stat-rejected">0</h3><p>Rejected</p></div></div>
+        </div>
+
+        <section id="submit" class="card section-spacing">
+            <h3><i class="fas fa-upload"></i> Submit New Manuscript</h3>
+            <form id="submission-form" style="margin-top: 1.5rem;">
+                <div class="form-row">
+                    <div class="form-group"><label>Manuscript Title <span class="req">*</span></label><input type="text" id="title" required></div>
+                    <div class="form-group"><label>Manuscript Type <span class="req">*</span></label><select id="manuscriptType" required><option value="">Select...</option><option>Research Article</option><option>Review Article</option><option>Case Study</option><option>Short Communication</option></select></div>
+                </div>
+                <div class="form-group"><label>Abstract (100-3000 characters) <span class="req">*</span></label><textarea id="abstract" rows="6" required minlength="100" maxlength="3000"></textarea><small id="char-count">0 / 3000 characters</small></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Author Full Name <span class="req">*</span></label><input type="text" id="authorName" required></div>
+                    <div class="form-group"><label>Co-author Names (Optional)</label><input type="text" id="coAuthors" placeholder="Comma separated"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Corresponding Author Email <span class="req">*</span></label><input type="email" id="authorEmail" required></div>
+                    <div class="form-group"><label>Reference/DOI (Optional)</label><input type="text" id="referenceDoi"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Institution/College <span class="req">*</span></label><input type="text" id="institution" required></div>
+                    <div class="form-group"><label>Department (Optional)</label><input type="text" id="department"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Research Area/Category <span class="req">*</span></label><input type="text" id="category" required></div>
+                    <div class="form-group"><label>Keywords <span class="req">*</span></label><input type="text" id="keywords" placeholder="Comma separated" required></div>
+                </div>
+                <div class="form-group"><label>Acknowledgements (Optional)</label><textarea id="acknowledgements" rows="3"></textarea></div>
+                <div class="form-group">
+                    <label>Upload PDF Manuscript <span class="req">*</span></label>
+                    <div class="file-upload-area" id="file-drop-area">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag & drop your PDF here or click to browse</p>
+                        <input type="file" id="pdfFile" accept="application/pdf" hidden>
+                        <button type="button" class="btn btn-outline" id="browse-btn">Browse Files</button>
+                    </div>
+                    <div id="file-info" class="file-info hidden"></div>
+                </div>
+                <div class="progress-container hidden" id="upload-progress"><div class="progress-bar" id="progress-bar"></div></div>
+                <button type="submit" class="btn btn-primary btn-block" id="submit-btn" style="margin-top:1.5rem;"><i class="fas fa-paper-plane"></i> Submit Manuscript</button>
+            </form>
+        </section>
+
+        <section id="my-submissions" class="card section-spacing">
+            <h3><i class="fas fa-folder-open"></i> My Submissions</h3>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead><tr><th>Title</th><th>Date</th><th>Category</th><th>Status</th><th>Remarks</th><th>Action</th></tr></thead>
+                    <tbody id="submissions-tbody"><tr><td colspan="6" class="empty-state">Loading submissions...</td></tr></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, push, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLah-dy8DXH2i77cUiCMyBdLZhoPk_3yM",
+            authDomain: "flutter-project-bb3cc.firebaseapp.com",
+            databaseURL: "https://flutter-project-bb3cc-default-rtdb.firebaseio.com",
+            projectId: "flutter-project-bb3cc",
+            storageBucket: "flutter-project-bb3cc.firebasestorage.app",
+            messagingSenderId: "1054750881945",
+            appId: "1:1054750881945:web:74096bfa122524e6f02008",
+            measurementId: "G-XWS35DKJK1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // Cloudinary Config
+        const CLOUD_NAME = "gr5ymou3";
+        const UPLOAD_PRESET = "techsphere_unsigned"; 
+        const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/raw/upload`;
+
+        let currentUser = null;
+        let selectedFile = null;
+        let isUploading = false;
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerText = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 500); }, 4000);
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return 'N/A';
+            const date = new Date(timestamp);
+            return date.toLocaleDateString();
+        }
+
+        function generateNav() {
+            const nav = document.getElementById('main-nav');
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    currentUser = user;
+                    get(ref(db, 'users/' + user.uid)).then((snapshot) => {
+                        const name = snapshot.exists() ? snapshot.val().name : 'User';
+                        nav.innerHTML = `<div class="nav-logo">TechSphere Journal</div><div class="nav-links"><a href="index.html">Home</a><a href="#submit">Submit</a><a href="#my-submissions">My Submissions</a><span class="nav-user">Welcome, ${name.split(' ')[0]}</span><button id="logout-btn" class="btn btn-outline">Logout</button></div>`;
+                        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth).then(() => window.location.href = 'user_auth.html'));
+                        loadUserStats(user.uid);
+                        loadUserSubmissions(user.uid);
+                        document.getElementById('authorEmail').value = user.email || '';
+                    });
+                } else {
+                    window.location.href = 'user_auth.html';
+                }
+            });
+        }
+
+        function loadUserStats(uid) {
+            onValue(ref(db, 'submissions'), (snapshot) => {
+                let total = 0, pending = 0, approved = 0, rejected = 0;
+                snapshot.forEach((childSnapshot) => {
+                    const sub = childSnapshot.val();
+                    if (sub.userId === uid) {
+                        total++;
+                        if (sub.status === 'pending') pending++;
+                        if (sub.status === 'approved') approved++;
+                        if (sub.status === 'rejected') rejected++;
+                    }
+                });
+                document.getElementById('stat-total').textContent = total;
+                document.getElementById('stat-pending').textContent = pending;
+                document.getElementById('stat-approved').textContent = approved;
+                document.getElementById('stat-rejected').textContent = rejected;
+            });
+        }
+
+        function loadUserSubmissions(uid) {
+            const tbody = document.getElementById('submissions-tbody');
+            onValue(ref(db, 'submissions'), (snapshot) => {
+                tbody.innerHTML = '';
+                let hasData = false;
+                snapshot.forEach((childSnapshot) => {
+                    const sub = childSnapshot.val();
+                    if (sub.userId === uid) {
+                        hasData = true;
+                        const row = document.createElement('tr');
+                        row.innerHTML = `<td>${sub.title}</td><td>${formatDate(sub.submittedAt)}</td><td>${sub.category}</td><td><span class="badge badge-${sub.status}">${sub.status}</span></td><td>${sub.adminRemarks || 'N/A'}</td><td><a href="${sub.pdfUrl}" target="_blank" class="btn btn-sm btn-outline">View PDF</a></td>`;
+                        tbody.appendChild(row);
+                    }
+                });
+                if (!hasData) tbody.innerHTML = '<tr><td colspan="6" class="empty-state">You have no submissions yet.</td></tr>';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            generateNav();
+            const abstract = document.getElementById('abstract');
+            abstract.addEventListener('input', () => document.getElementById('char-count').textContent = `${abstract.value.length} / 3000 characters`);
+
+            const fileInput = document.getElementById('pdfFile');
+            const dropArea = document.getElementById('file-drop-area');
+            document.getElementById('browse-btn').addEventListener('click', () => fileInput.click());
+            dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.classList.add('hover'); });
+            dropArea.addEventListener('dragleave', () => dropArea.classList.remove('hover'));
+            dropArea.addEventListener('drop', (e) => { e.preventDefault(); dropArea.classList.remove('hover'); if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]); });
+            fileInput.addEventListener('change', (e) => { if (e.target.files.length > 0) handleFile(e.target.files[0]); });
+
+            document.getElementById('submission-form').addEventListener('submit', handleSubmit);
+        });
+
+        function handleFile(file) {
+            if (file.type !== 'application/pdf' || !file.name.endsWith('.pdf')) { showToast('Please select a valid PDF file.', 'error'); return; }
+            if (file.size > 10 * 1024 * 1024) { showToast('File size exceeds 10MB limit.', 'error'); return; }
+            selectedFile = file;
+            const fileInfo = document.getElementById('file-info');
+            fileInfo.innerHTML = `<i class="fas fa-file-pdf"></i> ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB) <span class="text-success">Ready</span>`;
+            fileInfo.classList.remove('hidden');
+        }
+
+        function uploadToCloudinary(file, progressBar) {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', UPLOAD_PRESET);
+                xhr.upload.addEventListener('progress', (e) => { if (e.lengthComputable) { progressBar.style.width = (e.loaded / e.total) * 100 + '%'; } });
+                xhr.onreadystatechange = () => { if (xhr.readyState === 4) { if (xhr.status === 200) resolve(JSON.parse(xhr.responseText)); else reject(new Error('Cloudinary upload failed')); } };
+                xhr.open('POST', CLOUDINARY_URL, true);
+                xhr.send(formData);
+            });
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            if (isUploading) return;
+            if (!selectedFile) { showToast('Please select a PDF file first.', 'error'); return; }
+            
+            isUploading = true;
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+            const progressContainer = document.getElementById('upload-progress');
+            const progressBar = document.getElementById('progress-bar');
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = '0%';
+
+            try {
+                const cloudRes = await uploadToCloudinary(selectedFile, progressBar);
+                if (!cloudRes.secure_url) throw new Error('Upload failed: Invalid response');
+
+                const newSubmissionRef = push(ref(db, 'submissions'));
+                await set(newSubmissionRef, {
+                    userId: currentUser.uid,
+                    authorName: document.getElementById('authorName').value.trim(),
+                    authorEmail: document.getElementById('authorEmail').value.trim(),
+                    title: document.getElementById('title').value.trim(),
+                    abstract: document.getElementById('abstract').value.trim(),
+                    coAuthors: document.getElementById('coAuthors').value.trim() || 'N/A',
+                    institution: document.getElementById('institution').value.trim(),
+                    department: document.getElementById('department').value.trim() || 'N/A',
+                    category: document.getElementById('category').value.trim(),
+                    keywords: document.getElementById('keywords').value.trim(),
+                    manuscriptType: document.getElementById('manuscriptType').value,
+                    referenceDoi: document.getElementById('referenceDoi').value.trim() || 'N/A',
+                    acknowledgements: document.getElementById('acknowledgements').value.trim() || 'N/A',
+                    pdfUrl: cloudRes.secure_url,
+                    cloudinaryPublicId: cloudRes.public_id,
+                    originalFileName: selectedFile.name,
+                    fileSize: selectedFile.size,
+                    submittedAt: Date.now(),
+                    status: 'pending',
+                    adminRemarks: ''
+                });
+
+                showToast('Manuscript submitted successfully!', 'success');
+                document.getElementById('submission-form').reset();
+                document.getElementById('file-info').classList.add('hidden');
+                progressContainer.classList.add('hidden');
+                selectedFile = null;
+                document.getElementById('char-count').textContent = '0 / 3000 characters';
+            } catch (error) {
+                console.error(error);
+                showToast(error.message || 'Submission failed. Please try again.', 'error');
+            } finally {
+                isUploading = false;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Manuscript';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechSphere Journal - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0a192f; --secondary: #112240; --accent: #00b4a6;
+            --light: #e6f1ff; --success: #28a745; --danger: #dc3545;
+            --text-dark: #1a2b4c; --text-gray: #586c8d; --white: #ffffff;
+            --border: #d1d9e6; --shadow: 0 10px 30px -15px rgba(10, 25, 47, 0.15);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f5f7fa; color: var(--text-dark); line-height: 1.6; }
+        .auth-body { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+        .auth-container { background: var(--white); padding: 3rem; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 20px 50px -20px rgba(0,0,0,0.3); }
+        .auth-header { text-align: center; margin-bottom: 2rem; }
+        .auth-header h1 { color: var(--primary); font-size: 1.8rem; }
+        .auth-header p { color: var(--text-gray); }
+        .demo-warning { background: #fff3cd; color: #856404; padding: 0.5rem; border-radius: 4px; font-size: 0.85rem; margin-top: 1rem; }
+        .hidden { display: none !important; }
+        .auth-form { display: flex; flex-direction: column; gap: 1.5rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        label { font-weight: 600; color: var(--text-dark); }
+        input, select { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 4px; font-size: 1rem; background-color: #fff; }
+        input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(0, 180, 166, 0.1); }
+        .password-wrapper { position: relative; }
+        .password-wrapper input { padding-right: 2.5rem; }
+        .toggle-pass { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-gray); }
+        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; text-decoration: none; justify-content: center; }
+        .btn-primary { background: var(--accent); color: var(--white); }
+        .btn-danger { background: var(--danger); color: var(--white); }
+        .btn-success { background: var(--success); color: var(--white); }
+        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+        .btn-block { width: 100%; }
+        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+        .navbar { background: var(--primary); color: var(--white); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .nav-logo { font-size: 1.5rem; font-weight: bold; color: var(--accent); }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .dashboard-header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .dashboard-header h2 { font-size: 2rem; color: var(--primary); }
+        .admin-controls { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .form-control { padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 4px; min-width: 200px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--white); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--accent); box-shadow: var(--shadow); display: flex; align-items: center; gap: 1rem; }
+        .stat-card i { font-size: 2rem; color: var(--accent); background: rgba(0, 180, 166, 0.1); padding: 1rem; border-radius: 50%; }
+        .stat-card h3 { font-size: 2rem; color: var(--primary); }
+        .card { background: var(--white); border-radius: 8px; padding: 2rem; box-shadow: var(--shadow); }
+        .table-container { overflow-x: auto; margin-top: 1.5rem; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th { background: var(--secondary); color: var(--white); padding: 1rem; text-align: left; font-size: 0.85rem; text-transform: uppercase; }
+        .data-table td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        .data-table tr:hover { background: #f8f9fa; }
+        .badge { padding: 0.3rem 0.8rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; text-transform: capitalize; }
+        .badge-pending { background: #fff3cd; color: #856404; }
+        .badge-approved { background: #d4edda; color: #155724; }
+        .badge-rejected { background: #f8d7da; color: #721c24; }
+        .empty-state { text-align: center; padding: 2rem; color: var(--text-gray); font-style: italic; }
+        .action-buttons { display: flex; gap: 0.5rem; }
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { padding: 1rem 1.5rem; background: var(--secondary); color: white; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transform: translateX(100px); transition: all 0.3s ease; min-width: 250px; }
+        .toast.show { opacity: 1; transform: translateX(0); }
+        .toast-success { border-left: 4px solid var(--success); }
+        .toast-error { border-left: 4px solid var(--danger); }
+    </style>
+</head>
+<body class="auth-body">
+    <div id="toast-container"></div>
+    <div id="admin-login-view" class="auth-container">
+        <div class="auth-header">
+            <h1><i class="fas fa-user-shield"></i> Admin Portal</h1>
+            <p>Authorize to manage manuscripts</p>
+            <p class="demo-warning">DEMO ONLY: Username: admin | Password: admin123</p>
+        </div>
+        <form id="admin-login-form" class="auth-form">
+            <div class="form-group"><label>Username</label><input type="text" id="admin-user" required></div>
+            <div class="form-group"><label>Password</label><div class="password-wrapper"><input type="password" id="admin-pass" required><i class="fas fa-eye toggle-pass" id="toggle-admin-pass"></i></div></div>
+            <button type="submit" class="btn btn-primary btn-block">Login</button>
+        </form>
+    </div>
+
+    <div id="admin-dashboard" class="hidden">
+        <nav id="main-nav" class="navbar"></nav>
+        <div class="container">
+            <div class="dashboard-header">
+                <h2>Manuscript Management Dashboard</h2>
+                <div class="admin-controls">
+                    <input type="text" id="search-input" placeholder="Search title, author, email..." class="form-control">
+                    <select id="filter-status" class="form-control"><option value="all">All Statuses</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select>
+                    <button id="logout-admin" class="btn btn-danger">Logout</button>
+                </div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card"><i class="fas fa-users"></i><div><h3 id="stat-total-users">0</h3><p>Total Users</p></div></div>
+                <div class="stat-card"><i class="fas fa-file-alt"></i><div><h3 id="stat-total-subs">0</h3><p>Total Manuscripts</p></div></div>
+                <div class="stat-card"><i class="fas fa-hourglass-half"></i><div><h3 id="stat-pending-subs">0</h3><p>Pending</p></div></div>
+                <div class="stat-card"><i class="fas fa-check-circle"></i><div><h3 id="stat-approved-subs">0</h3><p>Approved</p></div></div>
+                <div class="stat-card"><i class="fas fa-times-circle"></i><div><h3 id="stat-rejected-subs">0</h3><p>Rejected</p></div></div>
+            </div>
+            <section class="card">
+                <h3><i class="fas fa-tasks"></i> All Submissions</h3>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead><tr><th>Title</th><th>Author</th><th>Email</th><th>Institution</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody id="admin-submissions-tbody"><tr><td colspan="7" class="empty-state">Loading data...</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLah-dy8DXH2i77cUiCMyBdLZhoPk_3yM",
+            authDomain: "flutter-project-bb3cc.firebaseapp.com",
+            databaseURL: "https://flutter-project-bb3cc-default-rtdb.firebaseio.com",
+            projectId: "flutter-project-bb3cc",
+            storageBucket: "flutter-project-bb3cc.firebasestorage.app",
+            messagingSenderId: "1054750881945",
+            appId: "1:1054750881945:web:74096bfa122524e6f02008",
+            measurementId: "G-XWS35DKJK1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const ADMIN_USER = "admin";
+        const ADMIN_PASS = "admin123";
+        let allSubmissions = [];
+        let allUsers = [];
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerText = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 500); }, 4000);
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return 'N/A';
+            return new Date(timestamp).toLocaleDateString();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('isAdmin') === 'true') showDashboard();
+
+            document.getElementById('admin-login-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const user = document.getElementById('admin-user').value;
+                const pass = document.getElementById('admin-pass').value;
+                if (user === ADMIN_USER && pass === ADMIN_PASS) { sessionStorage.setItem('isAdmin', 'true'); showDashboard(); }
+                else showToast('Invalid admin credentials.', 'error');
+            });
+
+            document.getElementById('toggle-admin-pass').addEventListener('click', (e) => {
+                const input = document.getElementById('admin-pass');
+                input.setAttribute('type', input.getAttribute('type') === 'password' ? 'text' : 'password');
+                e.target.classList.toggle('fa-eye-slash');
+            });
+        });
+
+        function showDashboard() {
+            document.body.classList.remove('auth-body');
+            document.getElementById('admin-login-view').classList.add('hidden');
+            document.getElementById('admin-dashboard').classList.remove('hidden');
+            document.getElementById('main-nav').innerHTML = `<div class="nav-logo">TechSphere Admin</div><div><button id="logout-nav" class="btn btn-danger">Logout</button></div>`;
+            document.getElementById('logout-admin').addEventListener('click', logoutAdmin);
+            document.getElementById('logout-nav').addEventListener('click', logoutAdmin);
+            document.getElementById('search-input').addEventListener('input', renderTable);
+            document.getElementById('filter-status').addEventListener('change', renderTable);
+            loadData();
+        }
+
+        function logoutAdmin() { sessionStorage.removeItem('isAdmin'); window.location.reload(); }
+
+        function loadData() {
+            onValue(ref(db, 'users'), (snapshot) => {
+                allUsers = snapshot.val() || {};
+                document.getElementById('stat-total-users').textContent = Object.keys(allUsers).length;
+            });
+            onValue(ref(db, 'submissions'), (snapshot) => {
+                const data = snapshot.val() || {};
+                allSubmissions = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+                allSubmissions.sort((a, b) => b.submittedAt - a.submittedAt);
+                updateStats(); renderTable();
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total-subs').textContent = allSubmissions.length;
+            document.getElementById('stat-pending-subs').textContent = allSubmissions.filter(s => s.status === 'pending').length;
+            document.getElementById('stat-approved-subs').textContent = allSubmissions.filter(s => s.status === 'approved').length;
+            document.getElementById('stat-rejected-subs').textContent = allSubmissions.filter(s => s.status === 'rejected').length;
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('admin-submissions-tbody');
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const filter = document.getElementById('filter-status').value;
+            let filtered = allSubmissions.filter(sub => {
+                const matchesSearch = !searchTerm || (sub.title && sub.title.toLowerCase().includes(searchTerm)) || (sub.authorName && sub.authorName.toLowerCase().includes(searchTerm)) || (sub.authorEmail && sub.authorEmail.toLowerCase().includes(searchTerm));
+                const matchesFilter = filter === 'all' || sub.status === filter;
+                return matchesSearch && matchesFilter;
+            });
+            if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No submissions found.</td></tr>'; return; }
+            tbody.innerHTML = '';
+            filtered.forEach(sub => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${sub.title || 'N/A'}</td><td>${sub.authorName || 'N/A'}</td><td>${sub.authorEmail || 'N/A'}</td><td>${sub.institution || 'N/A'}</td><td>${formatDate(sub.submittedAt)}</td>
+                    <td><span class="badge badge-${sub.status}">${sub.status}</span></td>
+                    <td class="action-buttons">
+                        <a href="${sub.pdfUrl}" target="_blank" class="btn btn-sm btn-outline"><i class="fas fa-eye"></i></a>
+                        ${sub.status === 'pending' ? `<button class="btn btn-sm btn-success" onclick="window.approveSubmission('${sub.id}')"><i class="fas fa-check"></i></button><button class="btn btn-sm btn-danger" onclick="window.rejectSubmission('${sub.id}')"><i class="fas fa-times"></i></button>` : `<span class="text-muted">Reviewed</span>`}
+                    </td>`;
+                tbody.appendChild(row);
+            });
+        }
+
+        window.approveSubmission = (id) => {
+            if (!confirm('Are you sure you want to APPROVE this manuscript?')) return;
+            update(ref(db, 'submissions/' + id), { status: 'approved', reviewedAt: Date.now(), adminRemarks: 'Approved by administrator.' })
+                .then(() => showToast('Manuscript approved.', 'success')).catch((err) => showToast('Failed: ' + err.message, 'error'));
+        };
+
+        window.rejectSubmission = (id) => {
+            const reason = prompt('Enter rejection reason/remarks:');
+            if (!reason) { showToast('Rejection requires a reason.', 'error'); return; }
+            update(ref(db, 'submissions/' + id), { status: 'rejected', reviewedAt: Date.now(), adminRemarks: reason })
+                .then(() => showToast('Manuscript rejected.', 'success')).catch((err) => showToast('Failed: ' + err.message, 'error'));
+        };
+    </script>
+</body>
+</html>
